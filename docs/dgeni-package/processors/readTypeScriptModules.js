@@ -91,6 +91,16 @@ module.exports = function readTypeScriptModules(tsParser, readFilesProcessor, mo
             }
           }
 
+          // Need to export enum's members so it is correctly generated in the d.ts
+          // Enums technically have no members, based on resolvedExport.flags, so
+          // the structure of the members here is different. 
+          if (exportDoc.docType == 'enum') {
+            exportDoc.members = [];
+            for (var etype in resolvedExport.exports) {
+              exportDoc.members.push(etype);
+            }
+          }
+
           // Add this export doc to its module doc
           moduleDoc.exports.push(exportDoc);
           docs.push(exportDoc);
@@ -165,6 +175,7 @@ module.exports = function readTypeScriptModules(tsParser, readFilesProcessor, mo
       fileInfo: getFileInfo(exportSymbol, basePath),
       location: getLocation(exportSymbol)
     };
+
     if(exportSymbol.flags & ts.SymbolFlags.Function) {
       exportDoc.parameters = getParameters(typeChecker, exportSymbol);
     }

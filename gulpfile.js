@@ -544,6 +544,23 @@ gulp.task('test.transpiler.unittest', function(done) {
 });
 
 // -----------------
+// test typings produced by dgeni.
+// dist/docs/angular2.d.ts fails
+// angular2 typings from definitely typed pass
+gulp.task('test.typings', [], function(done) {
+  var stream = gulp.src(['tools/typings_spec/*.ts', 'dist/docs/angular2.d.ts'])
+      .pipe(tsc({target: 'ES5', module: 'commonjs',
+                 // Don't use the version of typescript that gulp-typescript depends on, we need 1.5
+                 // see https://github.com/ivogabe/gulp-typescript#typescript-version
+                 typescript: require('typescript')}))
+      .on('error', function(error) {
+        // nodejs doesn't propagate errors from the src stream into the final stream so we are
+        // forwarding the error into the final stream
+        stream.emit('error', error);
+      });
+});
+
+// -----------------
 // orchestrated targets
 
 // Pure Dart packages only contain Dart code and conform to pub package layout.
